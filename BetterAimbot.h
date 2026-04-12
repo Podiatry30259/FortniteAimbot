@@ -1,51 +1,15 @@
-namespace UnrealEngine {
-	namespace Structs {
-		struct FRotator5 { // ue5
-			double Pitch;
-			double Yaw;
-			double Roll;
-		};
+// Aimbot was used for many months as an UD way to write camera angles offering a smooth aimbot 
+// Because It got into the hands of some wrong people I dont want this to be sold or whatever so you can use it in your externals or internals
+// I am stil using this in my private external but i am switching to a new input bypass because my bypass runs outside of memory
+// if you need help updating just contact or create an issue and i will release the new one. 
 
-		struct FRotator4 {
-			float Pitch;
-			float Yaw;
-			float Roll;
-		};
+// for SilentV2 you can go ahead and write angle then keep player rotation locked this will give that fake silent aim. 
 
-		struct FortniteOnly {
-			char Pad0[0x1C5]; // Latest
-			FRotator5 Rotation;
-			char Pad1[0x6F]; // Remaining Bytes
-		};
+void write_angles( uintptr_t view_matrix , f_rotation new_angles ) {
+    uintptr_t rotation_ptr = read_memory( view_matrix + 0x102b );
+    rotation_ptr = read_memory( rotation_ptr + 0x5c );
 
-		struct ValorantOnly {
-			char Pad0[0x20]; // Latest
-			FRotator4 Pending_Verify_Rotation;
-			char Pad1[0x9E]; // Latest
-			FRotator4 Final_Rotation;
-		};
+    uintptr_t rotation_sc = read_memory( rotation_ptr + 0x24 ); // if breaks each game update add 0x4 not for hotpatch
 
-		long long Finals = 0x50C; // Latest
-	}
-
-	namespace BetterAimbot {
-		namespace Fortnite {
-			void WriteAngles(long long TextAddress, Structs::FRotator5& Angles) {
-				const long long FirstPointer = TextAddress + 0x82482DC;
-				const long long WriteableAddress = FirstPointer + 3;
-
-				auto RelativePointer = *(long*)(WriteableAddress);
-				auto StructPointer = *(Structs::FortniteOnly**)(RelativePointer);
-
-				StructPointer->Rotation = Angles;
-			}
-
-		} // Public Now
-
-		namespace Valorant {
-		} // Private
-
-		namespace TheFinals {
-		} // Private
-	}
+    writememory( rotation_sc, new_angles );
 }
